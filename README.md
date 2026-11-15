@@ -1,8 +1,8 @@
 # RAG Lab
 
-RAG Lab is an educational prototype for learning and demonstrating AI/LLM application concepts. It explores document chunking and embeddings, vector retrieval, RAG prompt assembly, streaming generation, conversation memory and summarization, and a simple prompt-level grounding instruction that asks the model to answer from retrieved context or say when the answer is not there.
+RAG Lab is a portfolio learning project demonstrating practical understanding of AI/LLM application concepts. It explores document chunking and embeddings, vector retrieval, RAG prompt assembly, streaming generation, conversation memory and summarization, and grounding guardrails.
 
-The app is built with an ASP.NET Core API, a React frontend, Gemini models, and PostgreSQL with `pgvector`. Its harness coordinates retrieval, prompt construction, model generation, and memory updates. The UI lets you upload `.txt` and `.md` files, chat with them, and inspect chunks and retrieved context.
+The RAG flow uses `gemini-embedding-001` to embed documents and `gemini-3.5-flash-lite` to generate answers. Built with an ASP.NET Core API, a React frontend, and PostgreSQL with `pgvector`, the app lets you upload `.txt` and `.md` files, chat with them, and inspect chunks and retrieved context.
 
 ## Requirements
 
@@ -13,19 +13,17 @@ The app is built with an ASP.NET Core API, a React frontend, Gemini models, and 
 
 The backend creates its database tables and enables the `vector` extension when it starts. The PostgreSQL user must have permission to create the extension, or it must already be enabled in the target database.
 
-## Configure
+## Configuration i used:
 
 In `backend/appsettings.json`, set:
 
 - `ConnectionStrings:Postgres` to your PostgreSQL connection string.
 - `Llm:ApiKey` to your Google Gemini API key.
 - `Llm:BaseUrl` to the Gemini OpenAI-compatible API endpoint.
-- `Llm:ChatModel` to the Gemini chat model ID.
+- `Llm:ChatModel` to `gemini-3.5-flash-lite`.
 - `Llm:Temperature` to the generation temperature.
-- `Llm:EmbeddingModel` to the Gemini embedding model ID.
+- `Llm:EmbeddingModel` to `gemini-embedding-001`.
 - `Llm:EmbeddingDimensions` to the embedding vector size expected by the selected model and database.
-
-Do not commit real API keys or database passwords.
 
 ## Run
 
