@@ -1,33 +1,58 @@
-# RAG Lab — weekend AI-engineering project
+# RAG Lab
 
-.NET 10 minimal API + React (Vite) chat UI. Upload docs, chat with them, and see the internals (retrieval, prompt size, latency, memory).
+RAG Lab is an educational prototype for learning and demonstrating AI/LLM application concepts. It explores document chunking and embeddings, vector retrieval, RAG prompt assembly, streaming generation, conversation memory and summarization, and a simple prompt-level grounding instruction that asks the model to answer from retrieved context or say when the answer is not there.
 
-## Free model options (all OpenAI-compatible → just change `Llm:*` in appsettings)
-| Provider | Free? | Chat | Embeddings |
-|---|---|---|---|
-| **Google Gemini** (default) — aistudio.google.com/apikey | free tier, no card | gemini-3.5-flash-lite | gemini-embedding-001 |
-| **Groq** — console.groq.com | free tier | llama-3.3-70b-versatile | ❌ (use Gemini/Ollama for embeds) |
-| **OpenRouter** — openrouter.ai | `:free` models | e.g. meta-llama/llama-3.3-70b-instruct:free | ❌ |
-| **Ollama** (local, unlimited) | fully free | `llama3.2` | `nomic-embed-text` — BaseUrl `http://localhost:11434/v1` |
+The app is built with an ASP.NET Core API, a React frontend, Gemini models, and PostgreSQL with `pgvector`. Its harness coordinates retrieval, prompt construction, model generation, and memory updates. The UI lets you upload `.txt` and `.md` files, chat with them, and inspect chunks and retrieved context.
 
-Best for learning KV cache: run **Ollama** locally and compare time-to-first-token on repeated vs. changed prompt prefixes.
+## Requirements
+
+- .NET 10 SDK
+- Node.js and npm
+- PostgreSQL with the `pgvector` extension installed
+- A Google Gemini API key
+
+The backend creates its database tables and enables the `vector` extension when it starts. The PostgreSQL user must have permission to create the extension, or it must already be enabled in the target database.
+
+## Configure
+
+In `backend/appsettings.json`, set:
+
+- `ConnectionStrings:Postgres` to your PostgreSQL connection string.
+- `Llm:ApiKey` to your Google Gemini API key.
+- `Llm:BaseUrl` to the Gemini OpenAI-compatible API endpoint.
+- `Llm:ChatModel` to the Gemini chat model ID.
+- `Llm:Temperature` to the generation temperature.
+- `Llm:EmbeddingModel` to the Gemini embedding model ID.
+- `Llm:EmbeddingDimensions` to the embedding vector size expected by the selected model and database.
+
+Do not commit real API keys or database passwords.
 
 ## Run
+
+Start the backend:
+
 ```bash
-# backend
 cd backend
-dotnet user-secrets init && dotnet user-secrets set "Llm:ApiKey" "YOUR_KEY"   # or env var Llm__ApiKey
-dotnet run                     # http://localhost:5080
-# frontend
-cd frontend && npm install && npm run dev   # http://localhost:5173
+dotnet run
 ```
-Upload `sample-doc.md` and ask: "Why should system prompts come first?"
 
-## Plan (≈ 2 days)
-**Sat AM — Chat Completions & harness.** Read `Llm.Stream`: raw `/chat/completions` + SSE. Read `Harness.Run`: the loop (retrieve → assemble → generate → update memory).
-**Sat PM — RAG.** `Chunker`, embeddings, cosine search in `VectorStore`. Experiments: chunk size 300 vs 1500, top-k 1 vs 8, watch the "Retrieved context" panel and answer quality.
-**Sun AM — Memory.** `Memory`: sliding window + rolling summary. Ask 10+ questions, see "memory N turns + summary" in the stats line. Try: reference something said 9 turns ago.
-**Sun PM — KV cache & polish.** Prompt layout is static-prefix-first, context-last. With Ollama, compare first-token latency when (a) prefix identical vs (b) you inject a timestamp at the top of the system prompt. Hosted providers (Gemini) do implicit prefix caching for long prompts.
+The API listens at `http://localhost:5080`.
 
-## Stretch goals
-Tool calling (function calls in the harness), hybrid BM25+vector search, reranking, PDF upload, swap in pgvector/Qdrant, evals (question→expected source), token-accurate counting, Vercel AI SDK `useChat` UI.
+In another terminal, start the frontend:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open `http://localhost:5173`.
+
+## Use
+
+1. Upload a `.txt` or `.md` file using the document panel.
+2. Select the uploaded document and ask a question in the chat.
+3. Open the document's chunk view or a response's retrieved-context section to inspect what was used to answer.
+4. Delete a document from the document panel when it is no longer needed.
+
+The repository includes [sample-faq.md](sample-faq.md) as an example document to upload.
